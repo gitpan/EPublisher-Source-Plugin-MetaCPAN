@@ -20,18 +20,18 @@ my %WriteMakefileArgs = (
   "LICENSE" => "artistic_2",
   "NAME" => "EPublisher::Source::Plugin::MetaCPAN",
   "PREREQ_PM" => {
-    "EPublisher" => "0.3",
+    "EPublisher" => "0.6",
     "File::Basename" => 0,
     "File::Find" => 0,
     "File::Glob" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
-    "MetaCPAN::API" => 0,
+    "MetaCPAN::API" => "0.34",
     "Test::More" => 0,
     "Test::Pod" => "1.14",
     "Test::Pod::Coverage" => "1.08"
   },
-  "VERSION" => "0.1",
+  "VERSION" => "0.11",
   "test" => {
     "TESTS" => "t/*.t"
   }

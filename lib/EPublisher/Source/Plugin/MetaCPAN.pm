@@ -11,7 +11,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.1;
+our $VERSION = 0.11;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -39,13 +39,34 @@ sub load_source{
 
     # make a list from all possible POD-files in the lib directory
     my @files     = split /\n/, $manifest;
-    my @pod_files = grep{ /^lib\/.*\.p(?:od|m)\z/ }@files;
+    # some MANIFESTS (like POD::Parser) have comments after the filenames,
+    # so we match against an optional \s instead of \z
+    # the manifest, in POD::Parser in looks e.g. like this:
+    #
+    # lib/Pod/Usage.pm     -- The Pod::Usage module source
+    # lib/Pod/Checker.pm   -- The Pod::Checker module source
+    # lib/Pod/Find.pm      -- The Pod::Find module source
+    my @pod_files = grep{ /^.*\.p(?:od|m)\s?/  # all POD everywhere
+                          and not
+                          /^(?:example\/|t\/)/ # but not in example/ or t/
+                        }@files;
 
     # here whe store POD if we find some later on
     my @pod;
 
     # look for POD
     for my $file ( @pod_files ) {
+
+        # we match the filename again, in case there are comments in
+        # the manifest, in POD::Parser in looks e.g. like this:
+        #
+        # lib/Pod/Usage.pm     -- The Pod::Usage module source
+        # lib/Pod/Checker.pm   -- The Pod::Checker module source
+        # lib/Pod/Find.pm      -- The Pod::Find module source
+        if ( $file =~ m/^(.*\.p(?:od|m))\s/) {
+            # throw away any comments!
+            $file = $1;
+        }
 
         # the call below ($mcpan->pod()) fails if there is no POD in a
         # module so this is why I filter all the modules. I check if they
@@ -68,6 +89,10 @@ sub load_source{
             );
 
             next if $pod_src eq '{}';
+        }
+        else {
+            # if there is no head we consider this POD unvalid
+            next;
         }
         
         # check if $result is always only the Pod
@@ -98,7 +123,7 @@ EPublisher::Source::Plugin::MetaCPAN
 
 =head1 VERSION
 
-version 0.1
+version 0.11
 
 =head1 SYNOPSIS
 
@@ -117,17 +142,6 @@ EPublisher::Source::Plugin::MetaCPAN - MetaCPAN source plugin
   $url_source->load_source;
 
 reads the URL 
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 Renee Baecker and Boris Daeppen, all rights reserved.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of Artistic License 2.0.
-
-=head1 AUTHOR
-
-Renee Baecker (E<lt>module@renee-baecker.deE<gt>), Boris Daeppen (E<lt>boris_daeppen@bluewin.chE<gt>)
 
 =head1 AUTHOR
 
