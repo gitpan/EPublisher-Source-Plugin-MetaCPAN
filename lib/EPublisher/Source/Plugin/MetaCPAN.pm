@@ -11,7 +11,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.11;
+our $VERSION = 0.12;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -27,13 +27,10 @@ sub load_source{
     # fetching the requested module from metacpan
     my $module_result = $mcpan->fetch( 'release/' . $module );
 
-    # this produces something like e.g. "EPublisher-0.6"
-    my $release  = sprintf "%s-%s", $module, $module_result->{version};
-
     # get the manifest with module-author and modulename-moduleversion
     my $manifest = $mcpan->source(
         author  => $module_result->{author},
-        release => $release,
+        release => $module_result->{name},
         path    => 'MANIFEST',
     );
 
@@ -73,7 +70,7 @@ sub load_source{
         # have any line BEGINNING with '=head1' ore similar
         my $source = $mcpan->source(
             author         => $module_result->{author},
-            release        => $release,
+            release        => $module_result->{name},
             path           => $file,
         );
         # The Moose-Project made me write this filtering Regex, because
@@ -83,7 +80,7 @@ sub load_source{
         if ($source =~ /\n=(HEAD|Head|head)\d+/) {
             $pod_src = $mcpan->pod(
                 author         => $module_result->{author},
-                release        => $release,
+                release        => $module_result->{name},
                 path           => $file,
                 'content-type' => 'text/x-pod',
             );
@@ -123,7 +120,7 @@ EPublisher::Source::Plugin::MetaCPAN
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
