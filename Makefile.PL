@@ -9,7 +9,7 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "MetaCPAN source plugin",
+  "ABSTRACT" => "Get POD from distributions via MetaCPAN",
   "AUTHOR" => "Renee Baecker <module\@renee-baecker.de>, Boris Daeppen <boris_daeppen\@bluewin.ch>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
@@ -31,7 +31,7 @@ my %WriteMakefileArgs = (
     "Test::Pod" => "1.14",
     "Test::Pod::Coverage" => "1.08"
   },
-  "VERSION" => "0.12",
+  "VERSION" => "0.13",
   "test" => {
     "TESTS" => "t/*.t"
   }

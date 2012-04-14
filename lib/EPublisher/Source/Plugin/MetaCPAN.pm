@@ -1,8 +1,11 @@
 package EPublisher::Source::Plugin::MetaCPAN;
 
+# ABSTRACT: Get POD from distributions via MetaCPAN
+
 use strict;
 use warnings;
 
+use Data::Dumper;
 use File::Basename;
 use MetaCPAN::API;
 
@@ -11,11 +14,13 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.12;
+our $VERSION = 0.13;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
     my ($self) = @_;
+
+    $self->publisher->debug( '100: start ' . __PACKAGE__ );
 
     my $options = $self->_config;
     
@@ -25,9 +30,12 @@ sub load_source{
     my $mcpan  = MetaCPAN::API->new;
 
     # fetching the requested module from metacpan
+    $self->publisher->debug( "103: fetch release $module" );
     my $module_result = $mcpan->fetch( 'release/' . $module );
+    $self->publisher->debug( "103: fetch result: " . Dumper $module_result );
 
     # get the manifest with module-author and modulename-moduleversion
+    $self->publisher->debug( '103: get MANIFEST' );
     my $manifest = $mcpan->source(
         author  => $module_result->{author},
         release => $module_result->{name},
@@ -73,6 +81,9 @@ sub load_source{
             release        => $module_result->{name},
             path           => $file,
         );
+
+        $self->publisher->debug( "103: source of $file\n$source\n" );
+
         # The Moose-Project made me write this filtering Regex, because
         # they have .pm's without POD, and also with nonsense POD which
         # still fails if you call $mcpan->pod
@@ -84,6 +95,7 @@ sub load_source{
                 path           => $file,
                 'content-type' => 'text/x-pod',
             );
+            $self->publisher->debug( "103: pod\n$pod_src" );
 
             next if $pod_src eq '{}';
         }
@@ -101,7 +113,9 @@ sub load_source{
         $title =~ s{\.p(?:m|od)\z}{};
         $title =~ s{/}{::}g;
  
-        push @pod, { pod => $pod_src, filename => $filename, title => $title };
+        my $info = { pod => $pod_src, filename => $filename, title => $title };
+        push @pod, $info;
+        $self->publisher->debug( "103: passed info " . Dumper $info );
     }
     
     # voilà
@@ -116,21 +130,17 @@ __END__
 
 =head1 NAME
 
-EPublisher::Source::Plugin::MetaCPAN
+EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
   my $source_options = { type => 'MetaCPAN', module => 'Moose' };
   my $url_source     = EPublisher::Source->new( $source_options );
   my $pod            = $url_source->load_source;
-
-=head1 NAME
-
-EPublisher::Source::Plugin::MetaCPAN - MetaCPAN source plugin
 
 =head1 METHODS
 

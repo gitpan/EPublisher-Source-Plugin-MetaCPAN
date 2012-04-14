@@ -1,9 +1,9 @@
 
 
 This archive contains the distribution EPublisher-Source-Plugin-MetaCPAN,
-version 0.12:
+version 0.13:
 
-  MetaCPAN source plugin
+  Get POD from distributions via MetaCPAN
 
 This software is Copyright (c) 2012 by Renee Bäcker, Boris Däppen.
 
