@@ -15,7 +15,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.16;
+our $VERSION = 0.17;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -28,6 +28,7 @@ sub load_source{
     return '' unless $options->{module};
 
     my $module = $options->{module};    # the name of the CPAN-module
+    my $dont_merge_release = $options->{onlythis};
     my $mcpan  = MetaCPAN::API->new;
 
     # metacpan does not handle ".pm" in dist names
@@ -36,6 +37,23 @@ sub load_source{
 
     # fetching the requested module from metacpan
     $self->publisher->debug( "103: fetch release $module ($release_name_metacpan)" );
+
+    # if just the one and only POD from the modules name and not the entire
+    # release is wanted, we just fetch ist and return
+    if ($dont_merge_release) {
+
+        my $result = $mcpan->pod(  module        => $release_name_metacpan,
+                                  'content-type' => 'text/x-pod',
+                                );
+        my @pod = ();
+        my $info = { pod => $result, filename => '', title => $module };
+        push (@pod, $info);
+
+        # EXIT!
+        return @pod;
+    }
+    # ELSE we go on and build the entire release...
+
     my $module_result = $mcpan->fetch( 'release/' . $release_name_metacpan );
     $self->publisher->debug( "103: fetch result: " . Dumper $module_result );
 
@@ -151,7 +169,7 @@ EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
