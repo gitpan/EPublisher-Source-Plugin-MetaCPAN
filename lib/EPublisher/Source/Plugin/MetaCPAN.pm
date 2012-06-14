@@ -15,7 +15,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.18;
+our $VERSION = 0.19;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -39,7 +39,7 @@ sub load_source{
     $self->publisher->debug( "103: fetch release $module ($release_name_metacpan)" );
 
     # if just the one and only POD from the modules name and not the entire
-    # release is wanted, we just fetch ist and return
+    # release is wanted, we just fetch it and return
     if ($dont_merge_release) {
 
         my $result = $mcpan->pod(  module        => $release_name_metacpan,
@@ -54,8 +54,24 @@ sub load_source{
     }
     # ELSE we go on and build the entire release...
 
-    my $module_result = $mcpan->fetch( 'release/' . $release_name_metacpan );
-    $self->publisher->debug( "103: fetch result: " . Dumper $module_result );
+    # if there is a wrong module-name we write a debug-message and return
+    # an empty array
+    my $module_result;
+    eval {
+        $module_result =
+            $mcpan->fetch( 'release/' . $release_name_metacpan );
+    } or do {
+        $self->publisher->debug(
+            "103: release $release_name_metacpan does not exist"
+        );
+        return;
+    };
+
+    # if we reached here the module-call was probably fine...
+    # so we print out what we have got
+    $self->publisher->debug( "103: fetch result: "
+                            . Dumper $module_result
+                           );
 
     # get the manifest with module-author and modulename-moduleversion
     $self->publisher->debug( '103: get MANIFEST' );
@@ -123,13 +139,19 @@ sub load_source{
                     'content-type' => 'text/x-pod',
                 );
 
-                $self->publisher->debug( "103: got pod" ) if $pod_src !~ m/ \A { /x;
                 1;
             } or do{ $self->publisher->debug( $@ ); next; };
 
             if (!$pod_src) {
                 $self->publisher->debug( "103: empty pod handle" );
                 next;
+            }
+
+            if ( $pod_src =~ m/ \A ({.*) /xs ) {
+                $self->publisher->debug( "103: error message: $1" );
+            }
+            else {
+                $self->publisher->debug( "103: got pod" );
             }
 
             # metacpan always provides utf-8 encoded data, so we have to decode it
@@ -153,7 +175,20 @@ sub load_source{
  
         my $info = { pod => $pod_src, filename => $filename, title => $title };
         push @pod, $info;
-        $self->publisher->debug( "103: passed info " . Dumper $info );
+
+        # make some nice debug output for what is in $info
+        my $pod_short;
+        if ($pod_src =~ m/(.{50})/s) {
+            $pod_short = $1 . '[...]';
+        }
+        else {
+            $pod_short = $pod_src;
+        }
+        $self->publisher->debug( "103: passed info: "
+                                . "filename => $filename, "
+                                . "title => $title, "
+                                . "pod => $pod_short"
+                               );
     }
 
     # voilà
@@ -172,7 +207,7 @@ EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
