@@ -15,7 +15,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.20;
+our $VERSION = 0.19;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -149,7 +149,6 @@ sub load_source{
 
             if ( $pod_src =~ m/ \A ({.*) /xs ) {
                 $self->publisher->debug( "103: error message: $1" );
-                next;
             }
             else {
                 $self->publisher->debug( "103: got pod" );
@@ -208,7 +207,7 @@ EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.2
+version 0.19
 
 =head1 SYNOPSIS
 
