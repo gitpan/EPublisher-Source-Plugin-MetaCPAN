@@ -15,7 +15,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.21;
+our $VERSION = 0.20;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -199,7 +199,7 @@ sub load_source{
 1;
 
 
-
+__END__
 =pod
 
 =head1 NAME
@@ -208,15 +208,13 @@ EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.21
+version 0.2
 
 =head1 SYNOPSIS
 
   my $source_options = { type => 'MetaCPAN', module => 'Moose' };
   my $url_source     = EPublisher::Source->new( $source_options );
   my $pod            = $url_source->load_source;
-
-=encoding utf8
 
 =head1 METHODS
 
@@ -239,7 +237,4 @@ This is free software, licensed under:
   The Artistic License 2.0 (GPL Compatible)
 
 =cut
-
-
-__END__
 
