@@ -15,7 +15,7 @@ use EPublisher::Utils::PPI qw(extract_pod_from_code);
 
 our @ISA = qw( EPublisher::Source::Base );
 
-our $VERSION = 0.21;
+our $VERSION = 0.22;
 
 # implementing the interface to EPublisher::Source::Base
 sub load_source{
@@ -208,7 +208,7 @@ EPublisher::Source::Plugin::MetaCPAN - Get POD from distributions via MetaCPAN
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 SYNOPSIS
 
