@@ -8,6 +8,7 @@ dist.ini
 lib/EPublisher/Source/Plugin/MetaCPAN.pm
 t/01_titles.t
 t/02_err_modulename.t
+t/03_bin_dir.t
 t/95_pm_have_version.t
 t/96_pod_coverage.t
 t/97_pod.t
